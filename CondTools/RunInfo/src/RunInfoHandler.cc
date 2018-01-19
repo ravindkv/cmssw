@@ -1,7 +1,6 @@
 #include "FWCore/MessageLogger/interface/MessageLogger.h"
 #include "CondTools/RunInfo/interface/RunInfoHandler.h"
 #include "CondTools/RunInfo/interface/RunInfoRead.h"
-#include "CondTools/RunInfo/interface/RunInfoUpdate.h"
 #include<iostream>
 #include<vector>
 
@@ -68,7 +67,4 @@ void RunInfoHandler::getNewObjects() {
   ss << "run number: " << m_since << ";";
   m_userTextLog = ss.str();
   edm::LogInfo( "RunInfoHandler" ) << "[" << "RunInfoHandler::" << __func__ << "]:" << m_name << ": END." << std::endl;
-  // update runinfo table in conditions db
-  RunInfoUpdate updater( dbSession() );
-  updater.appendNewRun( *r );
 }

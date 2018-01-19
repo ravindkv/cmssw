@@ -68,6 +68,7 @@ RunInfoRead::readData( const std::string & runinfo_schema
   connection.setParameters( m_connectionPset );
   connection.configure();
   edm::LogInfo( "RunInfoReader" ) << "[RunInfoRead::" << __func__ << "]: Initialising read-only session to " << m_connectionString << std::endl;
+  //std::shared_ptr<coral::ISessionProxy> session = connection.createCoralSession( m_connectionString, false );
   std::shared_ptr<coral::ISessionProxy> session = connection.createCoralSession( m_connectionString, false );
   try{
     session->transaction().start( true );
@@ -117,9 +118,10 @@ RunInfoRead::readData( const std::string & runinfo_schema
       edm::LogInfo( "RunInfoReader" ) << osstart.str() << std::endl;
     }
     else {
-      std::stringstream errMsg;
-      errMsg << "[RunInfoRead::" << __func__ << "]: run " << r_number << " start time not found.";
-      throw std::runtime_error(errMsg.str());
+      edm::LogInfo( "RunInfoReader" ) << "[RunInfoRead::" << __func__ << "]: run " << r_number
+                                      << " start time not found." << std::endl;
+      temp_sum.m_start_time_str = "null";
+      temp_sum.m_start_time_ll = -1;
     }
     
     //new query to obtain the stop_time

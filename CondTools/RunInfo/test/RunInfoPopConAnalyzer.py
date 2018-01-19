@@ -3,7 +3,8 @@ import FWCore.ParameterSet.Config as cms
 import FWCore.ParameterSet.VarParsing as VarParsing
 from CondCore.CondDB.CondDB_cfi import *
 
-sourceConnection = 'oracle://cms_omds_adg/CMS_RUNINFO_R'
+sourceConnection = 'test_input.db'
+#sourceConnection = 'oracle://cms_omds_adg/CMS_RUNINFO_R'
 if socket.getfqdn().find('.cms') != -1:
     sourceConnection = 'oracle://cms_omds_lb/CMS_RUNINFO_R'
 
@@ -15,7 +16,8 @@ options.register( 'runNumber'
                 , "Run number to be uploaded."
                   )
 options.register( 'destinationConnection'
-                , 'sqlite_file:RunInfo_PopCon_test.db' #default value
+                , 'sqlite_file:test_input.db' #default value
+                #, 'sqlite_file:RunInfo_PopCon_test.db' #default value
                 , VarParsing.VarParsing.multiplicity.singleton
                 , VarParsing.VarParsing.varType.string
                 , "Connection string to the DB where payloads will be possibly written."
