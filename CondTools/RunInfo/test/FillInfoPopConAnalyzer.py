@@ -1,5 +1,5 @@
 import FWCore.ParameterSet.Config as cms
-
+print "test"
 process = cms.Process("ProcessOne")
 process.load("CondCore.DBCommon.CondDBCommon_cfi")
 process.CondDBCommon.connect = 'sqlite_file:fillinfo_pop_test.db'
