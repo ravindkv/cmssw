@@ -18,17 +18,30 @@
 #-------------------------------------
 # Setup CMSSW area and log files
 #-------------------------------------
-RELEASE=CMSSW_8_0_20
-RELEASE_DIR=/afs/cern.ch/work/r/rverma/private/o2o/
-DIR=/afs/cern.ch/work/r/rverma/private/o2o/CMSSW_8_0_20/src/CondTools/RunInfo/test
-LOGFILE=${DIR}/FillInfoTriggerO2O.log
-DATEFILE=${DIR}/FillInfoTriggerO2ODate.log
-DATE=`date --utc`
-OUTFILE="/afs/cern.ch/work/r/rverma/private/o2o/CMSSW_8_0_20/src/CondTools/RunInfo/test/o2oUpdate_$$.txt"
-pushd $RELEASE_DIR/$RELEASE/src/
-#@R#export SCRAM_ARCH=slc6_amd64_gcc493
 source /cvmfs/cms.cern.ch/cmsset_default.sh
 eval `scramv1 runtime -sh` 
+TEST_DIR=$CMSSW_BASE/src/CondTools/RunInfo/test
+mkdir -p $TEST_DIR/log
+LOG_DIR=$TEST_DIR/log
+LOGFILE=${LOG_DIR}/FillInfoTriggerO2O.log
+DATEFILE=${LOG_DIR}/FillInfoTriggerO2ODate.log
+DATE=`date --utc`
+MY_DATE=`date +"%Y%m%d_%H%M%S" --utc`
+
+#-------------------------------------
+# Fetch fill number from previous run.
+#-------------------------------------
+interval=3
+firstfill=$(grep -n firstFill FillInfoPopConAnalyzer.py | cut -d: -f1)
+firstfill=$(awk 'NR == '"$firstfill"' {print $4}' ${TEST_DIR}/FillInfoPopConAnalyzer.py)
+lastfill=$(grep -n lastFill FillInfoPopConAnalyzer.py | cut -d: -f1)
+lastfill=$(awk 'NR == '"$lastfill"' {print $4}' ${TEST_DIR}/FillInfoPopConAnalyzer.py)
+sed -i '35s/'"$firstfill"'/'`expr $lastfill + 1`'/' $TEST_DIR/FillInfoPopConAnalyzer.py
+sed -i '36s/'"$lastfill"'/'`expr $lastfill + $interval`'/' ${TEST_DIR}/FillInfoPopConAnalyzer.py
+let "firstfill=lastfill+1"
+let "lastfill=lastfill+interval"
+
+OUTFILE="${LOG_DIR}/FillInfoO2OUpdate_"$MY_DATE"_"$firstfill"-"$lastfill".txt"
 
 #-------------------------------------
 # Define functions
@@ -44,7 +57,6 @@ function submit() {
 #-------------------------------------
 # Get previous triggering date
 #-------------------------------------
-log "-----------------------------------------------------------------------"
 echo "--------: FillInfo O2O was triggered at :-------- " | tee -a $LOGFILE
 echo "$DATE" | tee -a $LOGFILE
 LOGDATE=`cat $DATEFILE | awk 'NR ==1 {print $0}'`
@@ -53,12 +65,12 @@ echo "timestamp for the log (last log)" $TMSLOGDATE "corresponding to date" | te
 echo $LOGDATE | tee -a $LOGFILE
 rm -f $DATEFILE
 echo $DATE > $DATEFILE
-pushd $DIR
+pushd $TEST_DIR
 
 
 #-------------------------------------
 # Run FillInfoPopConAnalyzer.py 
 #-------------------------------------
-submit cmsRun FillInfoPopConAnalyzer.py       
+#submit cmsRun FillInfoPopConAnalyzer.py       
 log DONE
 exit 0 

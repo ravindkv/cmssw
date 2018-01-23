@@ -2,6 +2,8 @@ import FWCore.ParameterSet.Config as cms
 
 process = cms.Process("ProcessOne")
 process.load("CondCore.DBCommon.CondDBCommon_cfi")
+#process.CondDBCommon.connect = 'oracle://cms_orcoff_prep/CMS_CONDITIONS'
+#process.CondDBCommon.DBParameters.authenticationPath = '/afs/cern.ch/user/r/rverma/'
 process.CondDBCommon.connect = 'sqlite_file:test_output.db'
 process.CondDBCommon.DBParameters.authenticationPath = '.'
 process.CondDBCommon.DBParameters.messageLevel=cms.untracked.int32(3)
@@ -33,7 +35,7 @@ process.Test1 = cms.EDAnalyzer("FillInfoPopConAnalyzer",
                                name = cms.untracked.string('FillInfo'), #payload name
                                Source = cms.PSet(fill = cms.untracked.uint32(6300),
                                    firstFill = cms.untracked.uint32(6300),
-                                   lastFill = cms.untracked.uint32(6300),
+                                   lastFill = cms.untracked.uint32(6310),
                                    connectionString = cms.untracked.string("oracle://cms_orcon_adg/CMS_RUNTIME_LOGGER"),
                                    DIPSchema = cms.untracked.string("CMS_BEAM_COND"),
                                                  #authenticationPath =  cms.untracked.string("/afs/cern.ch/cms/DB/conddb")

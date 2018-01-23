@@ -1,0 +1,2 @@
+*/1 * * * * lxplus049 /afs/cern.ch/work/r/rverma/private/o2o/CMSSW_8_0_20/src/CondTools/RunInfo/test/FillInfoUpdate.sh > /afs/cern.ch/work/r/rverma/private/o2o/CMSSW_8_0_20/src/CondTools/RunInfo/test/cron_log.txt
+
