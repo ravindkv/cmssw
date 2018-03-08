@@ -2,6 +2,7 @@
 #include "CondFormats/Common/interface/TimeConversions.h"
 #include <algorithm>
 #include <iterator>
+#include <vector>
 #include <stdexcept>
 
 //helper function: returns the positions of the bits in the bitset that are set (i.e., have a value of 1).
@@ -83,10 +84,13 @@ FillInfo::FillInfo(): m_isData( false )
 		    , m_intensity1( 0. )
 		    , m_intensity2( 0. )
 		    , m_energy( 0. )
+		    , m_delivLumi( 0. )
+		    , m_recLumi( 0. )
 		    , m_createTime( 0 )
 		    , m_beginTime( 0 )
 		    , m_endTime( 0 )
 		    , m_injectionScheme( "None" )
+		    , m_lumiPerBX( FillInfo::availableBunchSlots )
 {}
 
 FillInfo::FillInfo( unsigned short const & lhcFill, bool const & fromData ): m_isData( fromData )
@@ -103,10 +107,13 @@ FillInfo::FillInfo( unsigned short const & lhcFill, bool const & fromData ): m_i
 									   , m_intensity1( 0. )
 									   , m_intensity2( 0. )
 									   , m_energy( 0. )
+									   , m_delivLumi( 0. )
+									   , m_recLumi( 0. )
 									   , m_createTime( 0 )
 									   , m_beginTime( 0 )
 									   , m_endTime( 0 )
 									   , m_injectionScheme( "None" )
+									   , m_lumiPerBX( FillInfo::availableBunchSlots )
 {}
 
 FillInfo::~FillInfo() {}
@@ -127,9 +134,12 @@ void FillInfo::setFill( unsigned short const & lhcFill, bool const & fromData ) 
   m_intensity1 = 0;
   m_intensity2 = 0;
   m_energy = 0.;
+  m_delivLumi = 0.;
+  m_recLumi = 0.;
   m_createTime = 0;
   m_beginTime = 0;
   m_endTime = 0;
+  m_lumiPerBX.clear();  
   m_injectionScheme = "None";
   m_bunchConfiguration1.reset();
   m_bunchConfiguration2.reset();
@@ -179,17 +189,23 @@ float const FillInfo::crossingAngle() const {
 float const FillInfo::betaStar() const {
   return m_betastar;
 }
-
 float const FillInfo::intensityForBeam1() const {
   return m_intensity1;
 }
-
 float const FillInfo::intensityForBeam2() const {
   return m_intensity2;
 }
 
 float const FillInfo::energy() const {
   return m_energy;
+}
+
+float const FillInfo::delivLumi() const {
+  return m_delivLumi;
+}
+
+float const FillInfo::recLumi() const {
+  return m_recLumi;
 }
 
 cond::Time_t const FillInfo::createTime() const {
@@ -206,6 +222,10 @@ cond::Time_t const FillInfo::endTime() const {
 
 std::string const & FillInfo::injectionScheme() const {
   return m_injectionScheme;
+}
+
+std::vector<float> const & FillInfo::lumiPerBX() const {
+  return m_lumiPerBX;
 }
 
 //returns a boolean, true if the injection scheme has a leading 25ns
@@ -273,17 +293,23 @@ void FillInfo::setCrossingAngle( float const & angle ) {
 void FillInfo::setBetaStar( float const & betaStar ) {
   m_betastar = betaStar;
 }
-
 void FillInfo::setIntensityForBeam1( float const & intensity ) {
   m_intensity1 = intensity;
 }
-
 void FillInfo::setIntensityForBeam2( float const & intensity ) {
   m_intensity2 = intensity;
 }
 
 void FillInfo::setEnergy( float const & energy ) {
   m_energy = energy;
+}
+
+void FillInfo::setDelivLumi( float const & delivLumi ) {
+  m_delivLumi = delivLumi;
+}
+
+void FillInfo::setRecLumi( float const & recLumi ) {
+  m_recLumi = recLumi;
 }
 
 void FillInfo::setCreationTime( cond::Time_t const & createTime ) {
@@ -302,6 +328,10 @@ void FillInfo::setInjectionScheme( std::string const & injectionScheme ) {
   m_injectionScheme = injectionScheme;
 }
 
+void FillInfo::setLumiPerBX( std::vector<float> const & lumiPerBX) {
+  m_lumiPerBX = lumiPerBX;
+}
+
 //sets all values in one go
 void FillInfo::setBeamInfo( unsigned short const & bunches1
 			    ,unsigned short const & bunches2
@@ -315,10 +345,13 @@ void FillInfo::setBeamInfo( unsigned short const & bunches1
 			    ,float const & intensity1
 			    ,float const & intensity2
 			    ,float const & energy
+			    ,float const & delivLumi
+			    ,float const & recLumi
 			    ,cond::Time_t const & createTime
 			    ,cond::Time_t const & beginTime
 			    ,cond::Time_t const & endTime
 			    ,std::string const & scheme
+			    ,std::vector<float> const & lumiPerBX
 			    ,std::bitset<bunchSlots+1> const & bunchConf1
 			    ,std::bitset<bunchSlots+1> const & bunchConf2 ) {
   this->setBunchesInBeam1( bunches1 );
@@ -333,10 +366,13 @@ void FillInfo::setBeamInfo( unsigned short const & bunches1
   this->setIntensityForBeam1( intensity1 );
   this->setIntensityForBeam2( intensity2 );
   this->setEnergy( energy );
+  this->setDelivLumi( delivLumi );
+  this->setRecLumi( recLumi );
   this->setCreationTime( createTime );
   this->setBeginTime( beginTime );
   this->setEndTime( endTime );
   this->setInjectionScheme( scheme );
+  this->setLumiPerBX( lumiPerBX );
   this->setBunchBitsetForBeam1( bunchConf1 );
   this->setBunchBitsetForBeam2( bunchConf2 );
 }
@@ -355,10 +391,16 @@ void FillInfo::print( std::stringstream & ss ) const {
      << "Average Intensity for Beam 1 (number of charges): " << m_intensity1 << std::endl
      << "Average Intensity for Beam 2 (number of charges): " << m_intensity2 << std::endl
      << "Energy (GeV): " << m_energy << std::endl
+     << "Delivered Luminosity (max): " << m_delivLumi << std::endl
+     << "Recorded Luminosity (max): " << m_recLumi << std::endl
      << "Creation time of the fill: " << boost::posix_time::to_iso_extended_string( cond::time::to_boost( m_createTime ) ) << std::endl
      << "Begin time of Stable Beam flag: " << boost::posix_time::to_iso_extended_string( cond::time::to_boost( m_beginTime ) ) << std::endl
      << "End time of the fill: " << boost::posix_time::to_iso_extended_string( cond::time::to_boost( m_endTime ) ) << std::endl
      << "Injection scheme as given by LPC: " << m_injectionScheme << std::endl;
+  ss << "Luminosity per bunch  (total " << m_lumiPerBX.size() << "): ";
+  std::copy( m_lumiPerBX.begin(), m_lumiPerBX.end(), std::ostream_iterator<float>( ss, ", " ) );
+  ss << std::endl;
+  
   std::vector<unsigned short> bunchVector1 = this->bunchConfigurationForBeam1();
   std::vector<unsigned short> bunchVector2 = this->bunchConfigurationForBeam2();
   ss << "Bunches filled for Beam 1 (total " << bunchVector1.size() << "): ";

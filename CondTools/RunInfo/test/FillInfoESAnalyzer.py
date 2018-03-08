@@ -3,20 +3,24 @@ import FWCore.ParameterSet.Config as cms
 process = cms.Process("Test")
 process.load("CondCore.DBCommon.CondDBCommon_cfi")
 
-process.CondDBCommon.connect = 'sqlite_file:fillinfo_pop_test.db'
-process.CondDBCommon.DBParameters.authenticationPath = '.'
+#process.CondDBCommon.connect = 'oracle://cms_orcoff_prep/CMS_CONDITIONS'
+process.CondDBCommon.connect = 'sqlite_file:test_output.db'
+#process.CondDBCommon.connect = 'sqlite_file:fill_info_2016_17.db'
+process.CondDBCommon.DBParameters.authenticationPath = '/afs/cern.ch/user/r/rverma/'
+#process.CondDBCommon.DBParameters.authenticationPath = '.'
 
 process.maxEvents = cms.untracked.PSet(
   input = cms.untracked.int32(-1)
 )
 
+
 process.source = cms.Source("EmptyIOVSource",
     timetype = cms.string('timestamp'),
-    firstValue = cms.uint64(5412240172618088448),
-    lastValue = cms.uint64(5412267527264796672),
-    interval = cms.uint64( 3600 << 32 )
+    firstValue = cms.uint64(6477277751951493408),
+    #firstValue = cms.uint64(6477060826480649336),
+    lastValue = cms.uint64(6477277751951493408),
+    interval = cms.uint64(6477277751951493408)
 )
-
 
 
 process.rn = cms.ESSource("PoolDBESSource",
